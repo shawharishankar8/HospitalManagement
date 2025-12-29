@@ -13,9 +13,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Base64;
-import java.security.SecureRandom;
 
 @Service
 public class AuthService {
@@ -62,7 +62,7 @@ public class AuthService {
         AuthResponse response = new AuthResponse();
         response.setToken(accessToken);
         response.setRefreshToken(refreshToken);
-        response.setExpiresIn(300L); // 5 minutes in seconds
+        response.setExpiresIn(1200L); // 20 minutes in seconds
 
         // setting user id and password
         AuthResponse.UserResponse userResponse = new AuthResponse.UserResponse();

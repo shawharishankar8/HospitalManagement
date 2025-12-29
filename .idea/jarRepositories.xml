@@ -3,8 +3,23 @@
   <component name="RemoteRepositoriesConfiguration">
     <remote-repository>
       <option name="id" value="central" />
+      <option name="name" value="central" />
+      <option name="url" value="https://repo.maven.apache.org/maven2" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="central" />
       <option name="name" value="Central Repository" />
       <option name="url" value="https://repo.maven.apache.org/maven2" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="dcm4che" />
+      <option name="name" value="DCM4CHE Repository" />
+      <option name="url" value="https://www.dcm4che.org/maven2" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="oss-sonatype" />
+      <option name="name" value="OSS Sonatype Repository" />
+      <option name="url" value="https://oss.sonatype.org/content/repositories/releases" />
     </remote-repository>
     <remote-repository>
       <option name="id" value="central" />
