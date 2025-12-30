@@ -8,10 +8,14 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @ControllerAdvice
@@ -21,22 +25,22 @@ public class GlobalExceptionHandler {
      * 400 - Validation errors (@Valid failures)
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<HospitalResponse<Map<String, String>>> handleValidationErrors(
+    public ResponseEntity<Map<String, String>> handleValidationErrors(
             MethodArgumentNotValidException ex) {
 
-        Map<String, String> errors = new HashMap<>();
+        Map<String, String> errors = new LinkedHashMap<>();
 
-        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
-            errors.put(error.getField(), error.getDefaultMessage());
-        }
+        ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .sorted((e1, e2) -> e1.getField().compareTo(e2.getField()))
+                .forEach(error ->
+                        errors.put(error.getField(), error.getDefaultMessage())
+                );
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                new HospitalResponse<>(
-                        false,
-                        "Validation failed",
-                        errors
-                )
-        );
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(errors);
     }
 
 
@@ -118,5 +122,49 @@ public class GlobalExceptionHandler {
                 )
         );
     }
+
+
+    @ExceptionHandler(MissingPathVariableException.class)
+    public ResponseEntity<Map<String, String>> handleMissingPathVariable(
+            MissingPathVariableException ex) {
+
+        Map<String, String> error = new HashMap<>();
+        error.put("error", "Hospital ID is required in the URL path");
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(error);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Map<String, String>> handleTypeMismatch(
+            MethodArgumentTypeMismatchException ex) {
+
+        Map<String, String> error = new HashMap<>();
+        error.put("error", "Invalid hospital ID format");
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(error);
+    }
+
+
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<Map<String, String>> handleNoHandlerFound(
+            NoHandlerFoundException ex) {
+
+        Map<String, String> error = new HashMap<>();
+
+        if ("PUT".equalsIgnoreCase(ex.getHttpMethod())
+                && ex.getRequestURL().matches(".*/hospital$")) {
+            error.put("error", "Hospital ID is required in the URL path");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+
+        error.put("error", "Invalid API endpoint");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+
 }
 

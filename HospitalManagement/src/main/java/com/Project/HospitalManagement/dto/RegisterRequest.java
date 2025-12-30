@@ -11,7 +11,7 @@ public class RegisterRequest
     @NotBlank(message = "The name can not be empty")
     @Size(min = 3 , max= 50 , message = "name must be between 3 to 50 letters")
     @Pattern(
-            regexp = "^[A-Za-z]{3,50}$",
+            regexp = "^[A-Za-z]+( [A-Za-z]+)*$",
             message="provide a valid name, can only have alphabets"
     )
     private String name ;
@@ -20,7 +20,7 @@ public class RegisterRequest
     @Size(min = 3 , max= 50 , message = "Username must be between 3 to 50 letters")
     @Pattern(
             regexp = "^[a-zA-Z0-9@]+$",
-            message="provide a valid name, can only have alphabets and numbers"
+            message="provide a valid name, can only have alphabets and numbers and @"
     )
     private String username ;
 

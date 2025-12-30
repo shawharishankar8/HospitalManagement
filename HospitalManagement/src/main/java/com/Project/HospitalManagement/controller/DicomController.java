@@ -34,4 +34,6 @@ public class DicomController {
 
         return ResponseEntity.ok(dicomService.fetchDicom(id));
     }
+
+
 }

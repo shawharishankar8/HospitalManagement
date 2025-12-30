@@ -56,7 +56,6 @@ public class AuthController {
                 error.put("error", "Username already exists");
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
             }
-
             Map<String, String> error = new HashMap<>();
             error.put("error", "Internal server error");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);

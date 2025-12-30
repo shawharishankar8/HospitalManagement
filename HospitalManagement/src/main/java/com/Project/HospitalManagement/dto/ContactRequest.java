@@ -8,16 +8,28 @@ import lombok.Data;
 
 @Data
 public class ContactRequest {
-    @NotBlank
-    @Size(min = 3, max = 50)
-    @Pattern(regexp = "^[A-Za-z ]+$")
+
+    @NotBlank(message = "Contact name is required")
+    @Size(
+            min = 3,
+            max = 50,
+            message = "Contact name must be between 3 and 50 characters"
+    )
+    @Pattern(
+            regexp = "^[A-Za-z ]+$",
+            message = "Contact name can contain only alphabets and spaces"
+    )
     private String name;
 
-    @Email
-    @NotBlank
+    @NotBlank(message = "Email address is required")
+    @Email(message = "Please provide a valid email address")
     private String email;
 
-    @Pattern(regexp = "^[0-9]{10}$")
+    @NotBlank(message = "Contact number is required")
+    @Pattern(
+            regexp = "^[0-9]{10}$",
+            message = "Contact number must be exactly 10 digits"
+    )
     private String contactNumber;
 }
 

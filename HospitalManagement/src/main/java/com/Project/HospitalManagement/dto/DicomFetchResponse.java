@@ -8,6 +8,6 @@ public class DicomFetchResponse {
     private boolean hasFile;
     private String dicomId;
     private String dicomUrl;
-    private String xrayImageUrl;
+    private String dicomFileBase64;
     private PatientDetailedResponse patientDetails;
 }

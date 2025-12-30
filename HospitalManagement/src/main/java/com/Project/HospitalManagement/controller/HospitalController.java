@@ -21,7 +21,7 @@ public class HospitalController {
     @Autowired
     private HospitalService hospitalService;
 
-    @PostMapping
+    @PostMapping("/addHospital")
     public ResponseEntity<HospitalResponse<Map<String, Object>>> createHospital(@Valid @RequestBody HospitalRequest request)
     {
         Hospital hospital = hospitalService.createHospital(request);
@@ -40,7 +40,7 @@ public class HospitalController {
         );
     }
 
-    @GetMapping
+    @GetMapping("/getList")
     public ResponseEntity<HospitalResponse<List<Hospital>>> getHospitals(
             @RequestParam(required = false) String hospitalName,
             @RequestParam(required = false) String hospitalCode
@@ -55,19 +55,18 @@ public class HospitalController {
                 )
         );
     }
-
     @PutMapping("/{id}")
-    public ResponseEntity<HospitalResponse<Void>> updateHospital(
+    public ResponseEntity<HospitalResponse<Hospital>> updateHospital(
             @PathVariable Long id,
             @Valid @RequestBody HospitalRequest request) {
 
-        hospitalService.updateHospital(id, request);
+        Hospital updatedHospital = hospitalService.updateHospital(id, request);
 
         return ResponseEntity.ok(
                 new HospitalResponse<>(
                         true,
                         "Hospital record updated successfully.",
-                        null
+                        updatedHospital
                 )
         );
     }

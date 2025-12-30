@@ -2,6 +2,7 @@ package com.Project.HospitalManagement.dto;
 
 import lombok.Data;
 
+
 @Data
 public class PatientDetailedResponse {
     private String patientName;

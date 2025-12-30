@@ -28,9 +28,8 @@ public class DicomService {
         this.hospitalRepository = hospitalRepository;
     }
 
-    /**
-     * Upload DICOM and extract metadata
-     */
+     // Upload DICOM and extract metadata
+
     public DicomUploadResponse uploadDicom(Long hospitalId, MultipartFile file) {
 
         Hospital hospital = hospitalRepository.findById(hospitalId)
@@ -46,7 +45,7 @@ public class DicomService {
         }
 
         try {
-            // ---------- Store file ----------
+            // file storage
             String baseDir = System.getProperty("dicom.upload.dir");
             if (baseDir == null) {
                 baseDir = "C:/hospital-data/dicom"; // fallback safety
@@ -64,7 +63,7 @@ public class DicomService {
 
             String path = target.getAbsolutePath();
 
-            // ---------- Extract metadata ----------
+            //  Extract metadata
             Map<String, String> metadata = DicomMetadataExtractor.extract(target);
 
             String patientName = metadata.get("patient_name");
@@ -87,33 +86,25 @@ public class DicomService {
                 throw new RuntimeException("Missing Patient Birth Date in DICOM");
             }
 
-            // ---------- Save to DB ----------
-            Dicom dicom = new Dicom();
-            dicom.setHospitalId(hospitalId);
-            dicom.setPatientId(patientIdStr);
-            dicom.setPatientName(patientName);
-            dicom.setAge(age); // may be null, allowed
-            dicom.setSex(sex);
-            dicom.setBirthDate(birthDate);
-            dicom.setUploadDate(LocalDateTime.now());
-            dicom.setDicomFilePath(path);
+            // save and replace the dicom
+            Dicom dicom = dicomRepository.findByHospitalId(hospitalId)
+                            .orElseGet(Dicom::new);
+
+            //delete the old file , if adding a new file
+            if (dicom.getId() != null && dicom.getDicomFilePath() != null) {
+                File oldFile = new File(dicom.getDicomFilePath());
+                if (oldFile.exists()) {
+                    oldFile.delete();
+                }
+            }
+            //setting the data for database
+            extracted(hospitalId, dicom, patientIdStr, patientName, age, sex, birthDate, path);
 
             dicomRepository.save(dicom);
 
             // ---------- Prepare response ----------
             PatientDetailedResponse patient = new PatientDetailedResponse();
-            patient.setPatientName(patientName);
-            patient.setPatientId(dicom.getPatientId());
-            patient.setAge(age);
-            patient.setSex(sex);
-            patient.setBirthDate(birthDate);
-            patient.setUploadDate(dicom.getUploadDate().toString());
-            patient.setFileUrl(path);
-
-            DicomUploadResponse response = new DicomUploadResponse();
-            response.setHospitalCode(hospital.getHospitalCode());
-            response.setDicomStatus("Attached");
-            response.setDetailedResponse(patient);
+            DicomUploadResponse response = getDicomUploadResponse(patient, patientName, dicom, age, sex, birthDate, path, hospital);
 
             return response;
 
@@ -124,9 +115,35 @@ public class DicomService {
         }
     }
 
-    /**
-     * Fetch DICOM metadata for hospital
-     */
+    private static void extracted(Long hospitalId, Dicom dicom, String patientIdStr, String patientName, String age, String sex, String birthDate, String path) {
+        dicom.setHospitalId(hospitalId);
+        dicom.setPatientId(patientIdStr);
+        dicom.setPatientName(patientName);
+        dicom.setAge(age); // may be null, allowed
+        dicom.setSex(sex);
+        dicom.setBirthDate(birthDate);
+        dicom.setUploadDate(LocalDateTime.now());
+        dicom.setDicomFilePath(path);
+    }
+
+    private static DicomUploadResponse getDicomUploadResponse(PatientDetailedResponse patient, String patientName, Dicom dicom, String age, String sex, String birthDate, String path, Hospital hospital) {
+        patient.setPatientName(patientName);
+        patient.setPatientId(dicom.getPatientId());
+        patient.setAge(age);
+        patient.setSex(sex);
+        patient.setBirthDate(birthDate);
+        patient.setUploadDate(dicom.getUploadDate().toString());
+        patient.setFileUrl(path);
+
+        DicomUploadResponse response = new DicomUploadResponse();
+        response.setHospitalCode(hospital.getHospitalCode());
+        response.setDicomStatus("Attached");
+        response.setDetailedResponse(patient);
+        return response;
+    }
+
+
+    //Fetch DICOM metadata for hospital
     public DicomFetchResponse fetchDicom(Long hospitalId) {
 
         Hospital hospital = hospitalRepository.findById(hospitalId)
@@ -134,12 +151,25 @@ public class DicomService {
 
         return dicomRepository.findByHospitalId(hospitalId)
                 .map(dicom -> {
+
+                    File file = new File(dicom.getDicomFilePath());
+                    if (!file.exists()) {
+                        throw new RuntimeException("DICOM file not found on disk");
+                    }
+
+                    String base64File;
+                    try {
+                        byte[] fileBytes = java.nio.file.Files.readAllBytes(file.toPath());
+                        base64File = java.util.Base64.getEncoder().encodeToString(fileBytes);
+                    } catch (Exception e) {
+                        throw new RuntimeException("Failed to read DICOM file");
+                    }
+
                     DicomFetchResponse res = new DicomFetchResponse();
                     res.setHospitalCode(hospital.getHospitalCode());
                     res.setHasFile(true);
                     res.setDicomId(String.valueOf(dicom.getId()));
-                    res.setDicomUrl(dicom.getDicomFilePath());
-                    res.setXrayImageUrl(dicom.getDicomFilePath());
+                    res.setDicomFileBase64(base64File);
 
                     PatientDetailedResponse patient = new PatientDetailedResponse();
                     patient.setPatientName(dicom.getPatientName());
@@ -159,4 +189,7 @@ public class DicomService {
                     return res;
                 });
     }
+
+
+
 }

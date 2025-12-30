@@ -55,14 +55,14 @@ public class AuthService {
         // set refresh token to user element and save it into database
         User user = userRepository.findByUsername(username).orElseThrow();
         user.setRefreshToken(refreshToken);
-        user.setRefreshTokenExpiry(LocalDateTime.now().plusHours(7));
+        user.setRefreshTokenExpiry(LocalDateTime.now().plusMinutes(30));
         userRepository.save(user);
 
         // setting values to response
         AuthResponse response = new AuthResponse();
         response.setToken(accessToken);
         response.setRefreshToken(refreshToken);
-        response.setExpiresIn(1200L); // 20 minutes in seconds
+        response.setExpiresIn(300l); // 5 minutes in seconds
 
         // setting user id and password
         AuthResponse.UserResponse userResponse = new AuthResponse.UserResponse();
@@ -109,7 +109,7 @@ public class AuthService {
         // create a new refresh token and save it into the database
         String newRefreshToken = generateRefreshToken();
         user.setRefreshToken(newRefreshToken);
-        user.setRefreshTokenExpiry(LocalDateTime.now().plusHours(7));
+        user.setRefreshTokenExpiry(LocalDateTime.now().plusMinutes(30));
         userRepository.save(user);
 
         // generate new jwt token
