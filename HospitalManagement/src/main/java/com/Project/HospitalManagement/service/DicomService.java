@@ -1,13 +1,13 @@
-package com.Project.HospitalManagement.service;
+package com.project.HospitalManagement.service;
 
-import com.Project.HospitalManagement.config.DicomMetadataExtractor;
-import com.Project.HospitalManagement.dto.DicomFetchResponse;
-import com.Project.HospitalManagement.dto.DicomUploadResponse;
-import com.Project.HospitalManagement.dto.PatientDetailedResponse;
-import com.Project.HospitalManagement.entity.Dicom;
-import com.Project.HospitalManagement.entity.Hospital;
-import com.Project.HospitalManagement.repository.DicomRepository;
-import com.Project.HospitalManagement.repository.HospitalRepository;
+import com.project.HospitalManagement.config.DicomMetadataExtractor;
+import com.project.HospitalManagement.dto.DicomFetchResponse;
+import com.project.HospitalManagement.dto.DicomUploadResponse;
+import com.project.HospitalManagement.dto.PatientDetailedResponse;
+import com.project.HospitalManagement.entity.Dicom;
+import com.project.HospitalManagement.entity.Hospital;
+import com.project.HospitalManagement.repository.DicomRepository;
+import com.project.HospitalManagement.repository.HospitalRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -144,7 +144,7 @@ public class DicomService {
 
 
     //Fetch DICOM metadata for hospital
-    public DicomFetchResponse fetchDicom(Long hospitalId) {
+    public DicomFetchResponse fetchDicom(Long hospitalId){
 
         Hospital hospital = hospitalRepository.findById(hospitalId)
                 .orElseThrow(() -> new EntityNotFoundException("Invalid hospital ID"));

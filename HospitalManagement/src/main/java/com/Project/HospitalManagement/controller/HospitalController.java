@@ -1,9 +1,9 @@
-package com.Project.HospitalManagement.controller;
+package com.project.HospitalManagement.controller;
 
-import com.Project.HospitalManagement.dto.HospitalRequest;
-import com.Project.HospitalManagement.dto.HospitalResponse;
-import com.Project.HospitalManagement.entity.Hospital;
-import com.Project.HospitalManagement.service.HospitalService;
+import com.project.HospitalManagement.dto.HospitalRequest;
+import com.project.HospitalManagement.dto.HospitalResponse;
+import com.project.HospitalManagement.entity.Hospital;
+import com.project.HospitalManagement.service.HospitalService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/hospital")
@@ -44,7 +43,6 @@ public class HospitalController {
     public ResponseEntity<HospitalResponse<List<Hospital>>> getHospitals(
             @RequestParam(required = false) String hospitalName,
             @RequestParam(required = false) String hospitalCode
-
     ) {
         List<Hospital> hospitals =  hospitalService.getHospitals(hospitalName,hospitalCode);
         return ResponseEntity.ok(

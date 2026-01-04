@@ -1,4 +1,4 @@
-package com.Project.HospitalManagement.util;
+package com.project.HospitalManagement.util;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

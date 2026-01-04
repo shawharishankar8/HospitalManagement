@@ -1,7 +1,7 @@
-package com.Project.HospitalManagement.service;
+package com.project.HospitalManagement.service;
 
-import com.Project.HospitalManagement.entity.User;
-import com.Project.HospitalManagement.repository.UserRepository;
+import com.project.HospitalManagement.entity.User;
+import com.project.HospitalManagement.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

@@ -1,4 +1,4 @@
-package com.Project.HospitalManagement.dto;
+package com.project.HospitalManagement.dto;
 
 
 import lombok.AllArgsConstructor;

@@ -1,10 +1,10 @@
-package com.Project.HospitalManagement.service;
+package com.project.HospitalManagement.service;
 
-import com.Project.HospitalManagement.dto.ContactRequest;
-import com.Project.HospitalManagement.dto.HospitalRequest;
-import com.Project.HospitalManagement.entity.Hospital;
-import com.Project.HospitalManagement.entity.HospitalContact;
-import com.Project.HospitalManagement.repository.HospitalRepository;
+import com.project.HospitalManagement.dto.ContactRequest;
+import com.project.HospitalManagement.dto.HospitalRequest;
+import com.project.HospitalManagement.entity.Hospital;
+import com.project.HospitalManagement.entity.HospitalContact;
+import com.project.HospitalManagement.repository.HospitalRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,7 +30,6 @@ public class HospitalService  {
         hospital.setHospitalCode(generateHospitalCode(request.getHospitalName()));
 
         hospital.setContacts(mapContacts(hospital, request));
-
 
         return hospitalRepository.save(hospital);
     }

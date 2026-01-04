@@ -1,4 +1,4 @@
-package com.Project.HospitalManagement.dto;
+package com.project.HospitalManagement.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

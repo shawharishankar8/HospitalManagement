@@ -1,7 +1,7 @@
-package com.Project.HospitalManagement.config;
+package com.project.HospitalManagement.config;
 
-import com.Project.HospitalManagement.service.UserDetailsServiceImpl;
-import com.Project.HospitalManagement.util.JwtUtil;
+import com.project.HospitalManagement.service.UserDetailsServiceImpl;
+import com.project.HospitalManagement.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,6 +16,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -26,17 +27,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private UserDetailsServiceImpl userDetailsService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
+    ) throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
 
-        try {
-            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
 
-                String token = authHeader.substring(7);
+            String token = authHeader.substring(7);
+
+            try {
                 String username = jwtUtil.extractUsername(token);
 
                 if (username != null &&
@@ -55,29 +58,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                 );
 
                         authToken.setDetails(
-                                new WebAuthenticationDetailsSource().buildDetails(request)
+                                new WebAuthenticationDetailsSource()
+                                        .buildDetails(request)
                         );
 
-                        SecurityContextHolder.getContext().setAuthentication(authToken);
+                        SecurityContextHolder
+                                .getContext()
+                                .setAuthentication(authToken);
                     }
                 }
+
+            } catch (Exception jwtException) {
+                response.sendError(
+                        HttpServletResponse.SC_UNAUTHORIZED,
+                        "Invalid or expired JWT token"
+                );
+                return;
             }
-
-            filterChain.doFilter(request, response);
-
-        } catch (Exception e) {
-            // 👇 THIS is the key fix
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType("application/json");
-
-            response.getWriter().write("""
-                        {
-                          "success": false,
-                          "message": "Invalid or expired token",
-                          "data": null
-                        }
-                    """);
         }
+
+        // ✅ Always continue chain for valid or missing token
+        filterChain.doFilter(request, response);
     }
 }
-

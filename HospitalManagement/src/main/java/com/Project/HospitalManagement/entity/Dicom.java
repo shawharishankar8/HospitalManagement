@@ -1,4 +1,4 @@
-package com.Project.HospitalManagement.entity;
+package com.project.HospitalManagement.entity;
 
 
 import jakarta.persistence.*;
@@ -18,7 +18,7 @@ public class Dicom {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "hospital_id", nullable = false)
+    @Column(name = "hospital_id", nullable = false, unique = true)
     private Long hospitalId;
 
     @Column(name = "patient_id", nullable = false)
