@@ -95,4 +95,11 @@ public class HospitalService  {
         return prefix + "-" + suffix;
 
     }
+
+    public void deleteHospital(Long id) {
+        Hospital hospital = hospitalRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Hospital Id not found"));
+
+        hospitalRepository.delete(hospital);
+    }
 }

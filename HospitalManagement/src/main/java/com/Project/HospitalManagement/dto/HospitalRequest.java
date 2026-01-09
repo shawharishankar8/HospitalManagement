@@ -28,6 +28,6 @@ public class HospitalRequest {
 
 
     @Valid
-    @NotNull(message = "Second contact details are required")
+    @NotNull(message = "First contact details are required")
     private ContactRequest secondContact;
 }

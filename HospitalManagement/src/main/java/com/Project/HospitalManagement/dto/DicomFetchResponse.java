@@ -10,4 +10,5 @@ public class DicomFetchResponse {
     private String dicomUrl;
     private String dicomFileBase64;
     private PatientDetailedResponse patientDetails;
+
 }

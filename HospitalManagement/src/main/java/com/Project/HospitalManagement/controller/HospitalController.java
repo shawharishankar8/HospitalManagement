@@ -68,4 +68,16 @@ public class HospitalController {
                 )
         );
     }
+    @DeleteMapping("/deleteHospital/{id}")
+    public ResponseEntity<HospitalResponse<Void>> deleteHospital(@PathVariable Long id) {
+        hospitalService.deleteHospital(id);
+
+        return ResponseEntity.ok(
+                new HospitalResponse<>(
+                        true,
+                        "Hospital deleted successfully.",
+                        null
+                )
+        );
+    }
 }
