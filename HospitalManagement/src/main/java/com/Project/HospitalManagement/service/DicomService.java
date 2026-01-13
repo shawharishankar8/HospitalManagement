@@ -1,13 +1,13 @@
-package com.project.HospitalManagement.service;
+package com.Project.HospitalManagement.service;
 
-import com.project.HospitalManagement.config.DicomMetadataExtractor;
-import com.project.HospitalManagement.dto.DicomFetchResponse;
-import com.project.HospitalManagement.dto.DicomUploadResponse;
-import com.project.HospitalManagement.dto.PatientDetailedResponse;
-import com.project.HospitalManagement.entity.Dicom;
-import com.project.HospitalManagement.entity.Hospital;
-import com.project.HospitalManagement.repository.DicomRepository;
-import com.project.HospitalManagement.repository.HospitalRepository;
+import com.Project.HospitalManagement.repository.DicomRepository;
+import com.Project.HospitalManagement.repository.HospitalRepository;
+import com.Project.HospitalManagement.config.DicomMetadataExtractor;
+import com.Project.HospitalManagement.dto.DicomFetchResponse;
+import com.Project.HospitalManagement.dto.DicomUploadResponse;
+import com.Project.HospitalManagement.dto.PatientDetailedResponse;
+import com.Project.HospitalManagement.entity.Dicom;
+import com.Project.HospitalManagement.entity.Hospital;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,6 +18,7 @@ import java.util.Map;
 
 @Service
 public class DicomService {
+    private static final String DICOM_UPLOAD_DIR = "hospital-data/dicom";
 
     private final DicomRepository dicomRepository;
     private final HospitalRepository hospitalRepository;
@@ -31,7 +32,6 @@ public class DicomService {
      // Upload DICOM and extract metadata
 
     public DicomUploadResponse uploadDicom(Long hospitalId, MultipartFile file) {
-
         Hospital hospital = hospitalRepository.findById(hospitalId)
                 .orElseThrow(() -> new EntityNotFoundException("Hospital Id not found"));
 
@@ -45,25 +45,43 @@ public class DicomService {
         }
 
         try {
-            // file storage
-            String baseDir = System.getProperty("dicom.upload.dir");
-            if (baseDir == null) {
-                baseDir = "C:/hospital-data/dicom"; // fallback safety
-            }
+            // ====== FIX 1: Get the CURRENT WORKING DIRECTORY ======
+            String projectRoot = System.getProperty("user.dir");
+            System.out.println("DEBUG: Project root is: " + projectRoot);
 
-            File uploadDir = new File(baseDir);
+            // ====== FIX 2: Create FULL path to upload directory ======
+            File uploadDir = new File(projectRoot, DICOM_UPLOAD_DIR);
+            System.out.println("DEBUG: Upload directory will be: " + uploadDir.getAbsolutePath());
+
             if (!uploadDir.exists()) {
-                uploadDir.mkdirs();
+                boolean created = uploadDir.mkdirs();
+                System.out.println("DEBUG: Directory created: " + created);
             }
 
             String fileName = System.currentTimeMillis() + ".dcm";
             File target = new File(uploadDir, fileName);
 
-            file.transferTo(target);
+            System.out.println("DEBUG: Trying to save to: " + target.getAbsolutePath());
+
+            // ====== FIX 3: Use Files.copy() instead of transferTo() ======
+            // This ensures file goes to the exact location we specify
+            java.nio.file.Files.copy(
+                    file.getInputStream(),
+                    target.toPath(),
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING
+            );
 
             String path = target.getAbsolutePath();
+            System.out.println("SUCCESS: File saved to: " + path);
 
-            //  Extract metadata
+            // ====== FIX 4: Verify the file was created ======
+            if (target.exists()) {
+                System.out.println("VERIFIED: File exists, size: " + target.length() + " bytes");
+            } else {
+                System.out.println("WARNING: File might not have been created!");
+            }
+
+            // Extract metadata
             Map<String, String> metadata = DicomMetadataExtractor.extract(target);
 
             String patientName = metadata.get("patient_name");
@@ -72,7 +90,7 @@ public class DicomService {
             String sex = metadata.get("sex");
             String birthDate = metadata.get("birth_date");
 
-            // ---------- Validate required fields ----------
+            // Validate required fields
             if (patientIdStr == null || patientIdStr.isBlank()) {
                 throw new RuntimeException("Missing Patient ID in DICOM");
             }
@@ -88,30 +106,36 @@ public class DicomService {
 
             // save and replace the dicom
             Dicom dicom = dicomRepository.findByHospitalId(hospitalId)
-                            .orElseGet(Dicom::new);
+                    .orElseGet(Dicom::new);
 
-            //delete the old file , if adding a new file
+            // ====== FIX 5: Delete old file with correct path ======
             if (dicom.getId() != null && dicom.getDicomFilePath() != null) {
-                File oldFile = new File(dicom.getDicomFilePath());
+                File oldFile = new File(projectRoot, dicom.getDicomFilePath());
                 if (oldFile.exists()) {
-                    oldFile.delete();
+                    boolean deleted = oldFile.delete();
+                    System.out.println("DEBUG: Old file deleted: " + deleted);
                 }
             }
-            //setting the data for database
-            extracted(hospitalId, dicom, patientIdStr, patientName, age, sex, birthDate, path);
+
+            // ====== FIX 6: Store RELATIVE path in database ======
+            String relativePath = DICOM_UPLOAD_DIR + "/" + fileName;
+
+            //setting the data for database - store relative path
+            extracted(hospitalId, dicom, patientIdStr, patientName, age, sex, birthDate, relativePath);
 
             dicomRepository.save(dicom);
 
             // ---------- Prepare response ----------
             PatientDetailedResponse patient = new PatientDetailedResponse();
-            DicomUploadResponse response = getDicomUploadResponse(patient, patientName, dicom, age, sex, birthDate, path, hospital);
+            // Pass relative path to response, not absolute
+            DicomUploadResponse response = getDicomUploadResponse(patient, patientName, dicom, age, sex, birthDate, relativePath, hospital);
 
             return response;
 
         } catch (Exception e) {
-            // Keep real error visible for Postman + debugging
+            System.err.println("ERROR in uploadDicom: " + e.getMessage());
             e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException("DICOM upload failed: " + e.getMessage(), e);
         }
     }
 
@@ -126,14 +150,21 @@ public class DicomService {
         dicom.setDicomFilePath(path);
     }
 
-    private static DicomUploadResponse getDicomUploadResponse(PatientDetailedResponse patient, String patientName, Dicom dicom, String age, String sex, String birthDate, String path, Hospital hospital) {
+    private static DicomUploadResponse getDicomUploadResponse(PatientDetailedResponse patient,
+                                                              String patientName, Dicom dicom, String age, String sex,
+                                                              String birthDate, String relativePath, Hospital hospital) {  // Changed from 'path' to 'relativePath'
+
         patient.setPatientName(patientName);
         patient.setPatientId(dicom.getPatientId());
         patient.setAge(age);
         patient.setSex(sex);
         patient.setBirthDate(birthDate);
         patient.setUploadDate(dicom.getUploadDate().toString());
-        patient.setFileUrl(path);
+
+        // Convert relative path to absolute for the response if needed
+        String projectRoot = System.getProperty("user.dir");
+        String absolutePath = new File(projectRoot, relativePath).getAbsolutePath();
+        patient.setFileUrl(absolutePath);
 
         DicomUploadResponse response = new DicomUploadResponse();
         response.setHospitalCode(hospital.getHospitalCode());
@@ -145,15 +176,20 @@ public class DicomService {
 
     //Fetch DICOM metadata for hospital
     public DicomFetchResponse fetchDicom(Long hospitalId){
-
         Hospital hospital = hospitalRepository.findById(hospitalId)
                 .orElseThrow(() -> new EntityNotFoundException("Invalid hospital ID"));
 
         return dicomRepository.findByHospitalId(hospitalId)
                 .map(dicom -> {
+                    // ====== FIX: Convert relative path to absolute ======
+                    String relativePath = dicom.getDicomFilePath();
+                    String projectRoot = System.getProperty("user.dir");
+                    File file = new File(projectRoot, relativePath);
 
-                    File file = new File(dicom.getDicomFilePath());
+                    System.out.println("DEBUG: Looking for file at: " + file.getAbsolutePath());
+
                     if (!file.exists()) {
+                        System.err.println("ERROR: File not found at: " + file.getAbsolutePath());
                         throw new RuntimeException("DICOM file not found on disk");
                     }
 
@@ -162,7 +198,7 @@ public class DicomService {
                         byte[] fileBytes = java.nio.file.Files.readAllBytes(file.toPath());
                         base64File = java.util.Base64.getEncoder().encodeToString(fileBytes);
                     } catch (Exception e) {
-                        throw new RuntimeException("Failed to read DICOM file");
+                        throw new RuntimeException("Failed to read DICOM file: " + e.getMessage());
                     }
 
                     DicomFetchResponse res = new DicomFetchResponse();
@@ -178,6 +214,8 @@ public class DicomService {
                     patient.setSex(dicom.getSex());
                     patient.setBirthDate(dicom.getBirthDate());
                     patient.setUploadDate(dicom.getUploadDate().toString());
+                    // Store the actual file path if needed
+                    patient.setFileUrl(file.getAbsolutePath());
 
                     res.setPatientDetails(patient);
                     return res;

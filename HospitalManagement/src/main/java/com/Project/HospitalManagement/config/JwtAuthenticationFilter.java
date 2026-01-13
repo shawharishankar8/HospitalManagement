@@ -1,7 +1,7 @@
-package com.project.HospitalManagement.config;
+package com.Project.HospitalManagement.config;
 
-import com.project.HospitalManagement.service.UserDetailsServiceImpl;
-import com.project.HospitalManagement.util.JwtUtil;
+import com.Project.HospitalManagement.service.UserDetailsServiceImpl;
+import com.Project.HospitalManagement.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

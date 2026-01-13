@@ -1,4 +1,4 @@
-package com.project.HospitalManagement.entity;
+package com.Project.HospitalManagement.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;

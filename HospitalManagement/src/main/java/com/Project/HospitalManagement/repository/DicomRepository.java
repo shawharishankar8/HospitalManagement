@@ -1,6 +1,6 @@
-package com.project.HospitalManagement.repository;
+package com.Project.HospitalManagement.repository;
 
-import com.project.HospitalManagement.entity.Dicom;
+import com.Project.HospitalManagement.entity.Dicom;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,18 +1,20 @@
-package com.project.HospitalManagement.service;
+package com.Project.HospitalManagement.service;
 
-import com.project.HospitalManagement.dto.ContactRequest;
-import com.project.HospitalManagement.dto.HospitalRequest;
-import com.project.HospitalManagement.entity.Hospital;
-import com.project.HospitalManagement.entity.HospitalContact;
-import com.project.HospitalManagement.repository.HospitalRepository;
+import com.Project.HospitalManagement.repository.HospitalRepository;
+import com.Project.HospitalManagement.dto.ContactRequest;
+import com.Project.HospitalManagement.dto.HospitalRequest;
+import com.Project.HospitalManagement.entity.Hospital;
+import com.Project.HospitalManagement.entity.HospitalContact;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class HospitalService  {
@@ -25,34 +27,43 @@ public class HospitalService  {
         Hospital hospital = new Hospital();
         hospital.setName(request.getHospitalName());
         hospital.setAddress(request.getHospitalAddress());
-        hospital.setDate(LocalDate.now());
-
         hospital.setHospitalCode(generateHospitalCode(request.getHospitalName()));
-
         hospital.setContacts(mapContacts(hospital, request));
+        LocalDateTime now = LocalDateTime.now();
+        System.out.println("Setting date to: " + now);
+        System.out.println("Hour: " + now.getHour() + ", Minute: " + now.getMinute());
+        hospital.setDate(now);
 
         return hospitalRepository.save(hospital);
     }
 
     public List<Hospital> getHospitals(String hospitalName, String hospitalCode)
     {
+        final int MAX_LIMIT=100;
+        List<Hospital> hospitals = null;
         if (hospitalName != null && hospitalCode != null) {
-            return hospitalRepository
+            hospitals= hospitalRepository
                     .findByNameContainingIgnoreCaseAndHospitalCodeContainingIgnoreCase(
                             hospitalName, hospitalCode
                     );
         }
 
-        if (hospitalName != null) {
-            return hospitalRepository.findByNameContainingIgnoreCase(hospitalName);
+        else if (hospitalName != null) {
+            hospitals= hospitalRepository.findByNameContainingIgnoreCase(hospitalName);
         }
 
-        if (hospitalCode != null) {
-            return hospitalRepository.findByHospitalCodeContainingIgnoreCase(hospitalCode);
+         else if(hospitalCode != null) {
+            hospitals=hospitalRepository.findByHospitalCodeContainingIgnoreCase(hospitalCode);
         }
-        return hospitalRepository.findAll();
+
+        // Use the renamed method
+        else{
+            hospitals= hospitalRepository.findAllOrderByCreatedAtDesc();
+        }
+        return hospitals.stream()
+                .limit(MAX_LIMIT)
+                .collect(Collectors.toList());
     }
-
     public Hospital updateHospital(Long id , HospitalRequest request)
     {
         Hospital hospital = hospitalRepository.findById(id)

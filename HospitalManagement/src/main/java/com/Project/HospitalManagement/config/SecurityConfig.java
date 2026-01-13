@@ -1,7 +1,6 @@
-package com.project.HospitalManagement.config;
+package com.Project.HospitalManagement.config;
 
-import com.project.HospitalManagement.service.UserDetailsServiceImpl;
-import lombok.Builder;
+import com.Project.HospitalManagement.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -74,7 +73,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource(){
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        configuration.setAllowedOrigins(List.of("http://localhost:5173","http://localhost:3000"));
 
         configuration.setAllowedMethods(List.of(
                 "GET",

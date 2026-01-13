@@ -1,9 +1,9 @@
-package com.project.HospitalManagement.controller;
+package com.Project.HospitalManagement.controller;
 
 
-import com.project.HospitalManagement.dto.DicomFetchResponse;
-import com.project.HospitalManagement.dto.DicomUploadResponse;
-import com.project.HospitalManagement.service.DicomService;
+import com.Project.HospitalManagement.dto.DicomFetchResponse;
+import com.Project.HospitalManagement.dto.DicomUploadResponse;
+import com.Project.HospitalManagement.service.DicomService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;

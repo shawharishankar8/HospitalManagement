@@ -1,16 +1,23 @@
-package com.project.HospitalManagement.entity;
+package com.Project.HospitalManagement.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "hospitals")
+@Table(name = "hospitals",indexes = {
+        @Index(name = "idx_hospital_name", columnList = "name"),
+        @Index(name = "idx_hospital_code", columnList = "hospital_code"),
+        @Index(name = "idx_hospital_name_code", columnList = "name, hospital_code"),
+        @Index(name = "idx_hospital_created_desc", columnList = "id DESC")
+})
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -23,17 +30,18 @@ public class Hospital {
     @Column(name="hospital_code", nullable = false, unique = true, length = 50)
     private String hospitalCode;
 
-    @Column(nullable = false,length = 100)
+    @Column(nullable = false, length = 100)
     private String name;
 
-    @Column(nullable = false,length = 200)
+    @Column(nullable = false, length = 200)
     private String address;
 
     @Column(nullable = false)
-    private LocalDate date;
+    private LocalDateTime date;
 
 
     @OneToMany(mappedBy = "hospital", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<HospitalContact> contacts;
+    
 }

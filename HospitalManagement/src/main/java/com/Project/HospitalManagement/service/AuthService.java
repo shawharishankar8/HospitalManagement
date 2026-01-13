@@ -1,9 +1,9 @@
-package com.project.HospitalManagement.service;
+package com.Project.HospitalManagement.service;
 
-import com.project.HospitalManagement.dto.AuthResponse;
-import com.project.HospitalManagement.entity.User;
-import com.project.HospitalManagement.repository.UserRepository;
-import com.project.HospitalManagement.util.JwtUtil;
+import com.Project.HospitalManagement.repository.UserRepository;
+import com.Project.HospitalManagement.dto.AuthResponse;
+import com.Project.HospitalManagement.entity.User;
+import com.Project.HospitalManagement.util.JwtUtil;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;

@@ -1,10 +1,10 @@
-package com.project.HospitalManagement.controller;
+package com.Project.HospitalManagement.controller;
 
-import com.project.HospitalManagement.dto.AuthResponse;
-import com.project.HospitalManagement.dto.LoginRequest;
-import com.project.HospitalManagement.dto.RegisterRequest;
-import com.project.HospitalManagement.service.AuthService;
-import com.project.HospitalManagement.util.JwtUtil;
+import com.Project.HospitalManagement.dto.AuthResponse;
+import com.Project.HospitalManagement.dto.LoginRequest;
+import com.Project.HospitalManagement.dto.RegisterRequest;
+import com.Project.HospitalManagement.service.AuthService;
+import com.Project.HospitalManagement.util.JwtUtil;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

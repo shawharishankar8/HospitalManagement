@@ -1,6 +1,6 @@
-package com.project.HospitalManagement.exception;
+package com.Project.HospitalManagement.exception;
 
-import com.project.HospitalManagement.dto.HospitalResponse;
+import com.Project.HospitalManagement.dto.HospitalResponse;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

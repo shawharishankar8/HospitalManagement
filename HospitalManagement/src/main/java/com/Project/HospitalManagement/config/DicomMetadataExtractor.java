@@ -1,4 +1,4 @@
-package com.project.HospitalManagement.config;
+package com.Project.HospitalManagement.config;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
